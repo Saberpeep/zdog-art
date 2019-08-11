@@ -1,3 +1,3 @@
 # zdog-art
 
-[Redtail](https://saberpeep.github.io/zdog-art/redtail)
+1. [Redtail](https://saberpeep.github.io/zdog-art/redtail)
