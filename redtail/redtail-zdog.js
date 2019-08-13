@@ -76,6 +76,20 @@ document.addEventListener('DOMContentLoaded', function(){
         this.wingR = new Wing({
             addTo: this.anchor,
         }, 'R');
+        this.fuselageL = new Fuselage({
+            addTo: this.wingL.anchor,
+            translate: { z: 140 },
+        }, 'L');
+        this.fuselageR = new Fuselage({
+            addTo: this.wingR.anchor,
+            translate: { z: -140 },
+        }, 'R');
+        this.weaponL = new Weapon({
+            addTo: this.fuselageL.anchor,
+        }, 'L');
+        this.weaponR = new Weapon({
+            addTo: this.fuselageR.anchor,
+        }, 'R');
     
         function Cockpit(options){
             this.anchor = new Zdog.Anchor(options);
@@ -590,13 +604,52 @@ document.addEventListener('DOMContentLoaded', function(){
                 color: white,
             });
 
-            this.fuselageAnchor = new Zdog.Anchor({
-                addTo: this.anchor,
-                translate: { z: 150 },
+            this.ammoBay = new Zdog.Box({
+                addTo: this.wing,
+                width: 30,
+                height: 10,
+                depth: 60,
+                stroke: 20,
+                color: grey,
+                translate: { x: 20, y: 20, z: 50 },
+                topFace: white,
             });
 
+            this.ammoBelt = new Zdog.Shape({
+                addTo: this.anchor,
+                stroke: 7,
+                path: [
+                    { x: -5, y: 40, z: 100 },
+                    {
+                        arc: [
+                            { x: -30, y: 200, z: 100 }, //corner
+                            { x: -70, y: 200, z: 140 }, //endpoint
+                        ]
+                    },
+                    { x: -40, y: 200, z: 140 },
+                    {
+                        arc: [
+                            { x: -10, y: 200, z: 100 }, //corner
+                            { x: 15, y: 40, z: 100 }, //endpoint
+                        ]
+                    },
+                    
+                ],
+                closed: true,
+                fill: true,
+                translate: { y: 0, z: 0 },
+                color: grey.shadow,
+            });
+
+            flipIfRight(this, side);
+            
+        }//end wing
+
+        function Fuselage(options, side){
+            this.anchor = new Zdog.Anchor(options);
+
             this.fuselageTop = new Zdog.Shape({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 stroke: 14,
                 path: [
                     //inner edge
@@ -620,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         ]
                     },
                     { x: 50, y: 10, z: 70 },
-                    { x: -30, y: 10, z: 90 },
+                    { x: -30, y: 10, z: 80 },
                     //return
                     { x: -70, y: 0, z: 0 },
                     
@@ -630,8 +683,50 @@ document.addEventListener('DOMContentLoaded', function(){
                 color: white,
             });
 
+            this.fuselageTopHandleAnchor = new Zdog.Anchor({
+                addTo: this.anchor,
+                translate: { x: 30, y: 0, z: 45 },
+                scale: 0.8,
+            });
+
+            this.fuselageTopHandleA = new Zdog.Shape({
+                addTo: this.fuselageTopHandleAnchor,
+                stroke: 14,
+                path: [
+                    { x: -14, y: -7, z: 0 },
+                    { x: 14, y: -7, z: 0 },
+                ],
+                color: grey,
+            });
+            this.fuselageTopHandleB = new Zdog.Shape({
+                addTo: this.fuselageTopHandleAnchor,
+                stroke: 14,
+                path: [
+                    { x: -25, y: -7, z: 0 },
+                    { x: -35, y: -7, z: 0 },
+                    { x: -35, y: 0, z: -20 },
+                    { x: -35, y: 0, z: 0 },
+                ],
+                closed: true,
+                fill: true,
+                color: white,
+            });
+            this.fuselageTopHandleC = new Zdog.Shape({
+                addTo: this.fuselageTopHandleAnchor,
+                stroke: 14,
+                path: [
+                    { x: 25, y: -7, z: 0 },
+                    { x: 35, y: -7, z: 0 },
+                    { x: 35, y: 0, z: -20 },
+                    { x: 35, y: 0, z: 0 },
+                ],
+                closed: true,
+                fill: true,
+                color: white,
+            });
+
             this.fuselageFrontInner = new Zdog.Shape({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 stroke: 14,
                 path: [
                     //top inner edge
@@ -665,14 +760,14 @@ document.addEventListener('DOMContentLoaded', function(){
             });
 
             this.fuselageFrontOuter = new Zdog.Shape({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 stroke: 14,
                 path: [
                     //top inner edge
                     { x: -50, y: 5, z: 45 },
                     //outer edge
-                    { x: -30, y: 10, z: 90 },
-                    { x: -20, y: 70, z: 95 },
+                    { x: -30, y: 10, z: 80 },
+                    { x: -20, y: 70, z: 85 },
                     { x: -30, y: 110, z: 50 },
                     { x: -20, y: 160, z: 50 },
                     //bottom edge
@@ -699,7 +794,7 @@ document.addEventListener('DOMContentLoaded', function(){
             });
 
             this.fuselageOuterSide = new Zdog.Shape({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 stroke: 14,
                 path: [
                     //top edge
@@ -712,14 +807,14 @@ document.addEventListener('DOMContentLoaded', function(){
                         ]
                     },
                     { x: 50, y: 10, z: 70 },
-                    { x: -30, y: 10, z: 90 },
+                    { x: -30, y: 10, z: 80 },
                     //front edge
-                    { x: -20, y: 70, z: 95 },
+                    { x: -20, y: 70, z: 85 },
                     { x: -30, y: 110, z: 50 },
                     { x: -20, y: 160, z: 50 },
                     //bottom edge
                     { x: 100, y: 60, z: 50 },
-                    { x: -20, y: 70, z: 95 },//fill cut in 1
+                    { x: -20, y: 70, z: 85 },//fill cut in 1
                     { x: 100, y: 60, z: 50 },//fill cut in 1
                     { x: 50, y: 10, z: 70 },//fill cut in 2
                     { x: 100, y: 60, z: 50 },//fill cut in 2
@@ -733,8 +828,73 @@ document.addEventListener('DOMContentLoaded', function(){
                 color: white,
             });
 
+            this.fuselageOuterBump = new Zdog.Shape({
+                addTo: this.anchor,
+                stroke: 20,
+                path: [
+                    { x: 15, y: 60, z: 82 },
+                    { x: 20, y: 60, z: 80 },
+                ],
+                color: grey,
+            });
+
+            this.fuselageBottomSide = new Zdog.Shape({
+                addTo: this.anchor,
+                stroke: 14,
+                path: [
+                    //back edge
+                    { x: 200, y: 15, z: 0 },
+                    //outer edge
+                    { x: 200, y: 25, z: 15 },
+                    { x: 100, y: 60, z: 50 },
+                    //front edge outer
+                    { x: -20, y: 160, z: 50 },
+                    { x: -20, y: 160, z: 35 },
+                    //arm cutout
+                    { x: 50, y: 110, z: 27 },
+                    { x: 50, y: 110, z: 7 },
+                    //front edge inner
+                    { x: -30, y: 160, z: 1 },
+                    { x: -30, y: 160, z: 0 },
+                    //inner edge
+                    { x: 100, y: 60, z: 0 },
+                    { x: 200, y: 25, z: 0 },
+                    
+                ],
+                closed: true,
+                fill: true,
+                color: white,
+            });
+
+            this.fuselageInnerSide = new Zdog.Shape({
+                addTo: this.anchor,
+                stroke: 14,
+                path: [
+                    //top edge
+                    { x: -70, y: 0, z: 0 },
+                    {
+                        arc: [
+                            { x: 0, y: 0, z: -10 }, //corner
+                            { x: 180, y: 0, z: 0 }, //endpoint
+                        ]
+                    },
+                    { x: 200, y: 15, z: 0 },
+                    //bottom edge
+                    { x: 200, y: 25, z: 0 },
+                    { x: 100, y: 60, z: 0 },
+                    { x: -30, y: 160, z: 0 },
+                    //front edge
+                    { x: -75, y: 30, z: -5 },
+                    { x: -70, y: 0, z: 0 },
+                    
+                ],
+                closed: true,
+                fill: true,
+                color: white,
+            });
+
             this.frontJetFlap = new Zdog.Shape({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 stroke: 14,
                 path: [
                     //top edge
@@ -756,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function(){
             });
 
             this.frontJetHoleFill = new Zdog.Ellipse({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 diameter: 60,
                 stroke: 14,
                 fill: true,
@@ -766,7 +926,7 @@ document.addEventListener('DOMContentLoaded', function(){
             });
 
             this.frontJetGroup = new Zdog.Group({
-                addTo: this.fuselageAnchor,
+                addTo: this.anchor,
                 translate: { x: -60, y: 60, z: 43 },
             });
 
@@ -784,53 +944,208 @@ document.addEventListener('DOMContentLoaded', function(){
                 scale: 0.7,
             })
 
-            function Jet(options){
-                this.anchor = new Zdog.Anchor(options);
+            this.bottomJet = new Jet({
+                addTo: this.anchor,
+                rotate: { z: TAU / 8 },
+                translate: { x: 95, y: 75, z: 27 },
+                scale: 0.5,
+            })
 
-                this.jet = new Zdog.Cone({
-                    addTo: this.anchor,
-                    diameter: 60,
-                    length: 60,
-                    stroke: 7,
-                    backface: grey.shadow,
-                    rotate: { y: TAU / 4 },
-                    color: grey,
-                });
-                this.jetConePieces = [];
-                for (var i = 0; i < 3; i++){
-                    this.jetConePieces.push(
-                        new Zdog.Ellipse({
-                            addTo: this.jet,
-                            diameter: 55 + (i * 8),
-                            stroke: 11 - i,
-                            translate: { z: -7 * i },
-                            color: grey,
-                        })
-                    );
-                } 
-                this.cross = new Zdog.Shape({
-                    addTo: this.jet,
-                    stroke: 7,
-                    path: [
-                        { x: 0, y: 0, z: 0 },
-                        { x: 0, y: 30, z: 0 },
-                        { x: 0, y: -30, z: 0 },
-                        { x: 0, y: 0, z: 0 },
-                        { x: 30, y: 0, z: 0 },
-                        { x: -30, y: 0, z: 0 },
-                    ],
-                    closed: false,
-                    fill: false,
-                    color: grey,
-                });
+             flipIfRight(this, side);
+        }//end fuselage
+
+        function Jet(options){
+            this.anchor = new Zdog.Anchor(options);
+
+            this.jet = new Zdog.Cone({
+                addTo: this.anchor,
+                diameter: 60,
+                length: 60,
+                stroke: 7,
+                backface: grey.shadow,
+                rotate: { y: TAU / 4 },
+                color: grey,
+            });
+            this.jetConePieces = [];
+            for (var i = 0; i < 3; i++){
+                this.jetConePieces.push(
+                    new Zdog.Ellipse({
+                        addTo: this.jet,
+                        diameter: 55 + (i * 8),
+                        stroke: 11 - i,
+                        translate: { z: -7 * i },
+                        color: grey,
+                    })
+                );
             } 
+            this.cross = new Zdog.Shape({
+                addTo: this.jet,
+                stroke: 7,
+                path: [
+                    { x: 0, y: 0, z: 0 },
+                    { x: 0, y: 30, z: 0 },
+                    { x: 0, y: -30, z: 0 },
+                    { x: 0, y: 0, z: 0 },
+                    { x: 30, y: 0, z: 0 },
+                    { x: -30, y: 0, z: 0 },
+                ],
+                closed: false,
+                fill: false,
+                color: grey,
+            });
+        }//end jet
+
+        function Weapon(options, side){
+            this.anchor = new Zdog.Anchor(options);
+
+            this.armA = new Zdog.Shape({
+                addTo: this.anchor,
+                stroke: 25,
+                path: [
+                    { x: -30, y: 100, z: 20 },
+                    { x: -30, y: 120, z: 20 },
+                    { x: -60, y: 175, z: 20 },
+                    { x: -100, y: 175, z: 20 },
+                    { x: -110, y: 180, z: 20 },
+                    { x: -50, y: 180, z: 20 },
+                    { x: -55, y: 180, z: 20 },
+                    { x: -25, y: 120, z: 20 },
+                ],
+                closed: true,
+                fill: true,
+                color: white,
+            });
+            this.armB = new Zdog.Shape({
+                addTo: this.anchor,
+                stroke: 14,
+                path: [
+                    { x: -10, y: 120, z: 20 },
+                    { x: -40, y: 185, z: 20 },
+                    { x: -20, y: 185, z: 20 },
+                ],
+                closed: false,
+                fill: false,
+                color: grey,
+            });
+
+            this.gunAnchor = new Zdog.Anchor({
+                addTo: this.anchor,
+                translate: { x: -50, y: 190, z: 20 },
+            });
+
+            this.mainBarrel = new Zdog.Cylinder({
+                addTo: this.gunAnchor,
+                diameter: 15,
+                length: 200,
+                stroke: false,
+                translate: { x: -70, y: 10 },
+                rotate: { y: TAU / 4 },
+                color: grey,
+                backface: grey.shadow,
+            });
+
+            this.sideBarsA = new Zdog.Shape({
+                addTo: this.gunAnchor,
+                stroke: 14,
+                path: [
+                    { x: 70, y: 15, z: 10 },
+                    { x: 40, y: 0, z: 10 },
+                    { x: -45, y: 0, z: 10 },
+                    { x: -60, y: 15, z: 10 },
+                    { x: -150, y: 15, z: 10 },
+                    { x: -160, y: 0, z: 0 },
+                    { x: -190, y: 0, z: 0 },//middle point
+                    { x: -160, y: 0, z: 0 },
+                    { x: -150, y: 15, z: -10 },
+                    { x: -60, y: 15, z: -10 },
+                    { x: -45, y: 0, z: -10 },
+                    { x: 40, y: 0, z: -10 },
+                    { x: 70, y: 15, z: -10 },
+                ],
+                translate: { y: 5 },
+                closed: true,
+                fill: true,
+                color: grey,
+            });
+
+            this.sideBarsB = new Zdog.Shape({
+                addTo: this.gunAnchor,
+                stroke: 14,
+                path: [
+                    //left side
+                    { x: 70, y: 25, z: 15 },
+                    { x: 40, y: 10, z: 15 },
+                    { x: -20, y: 10, z: 15 },
+                    { x: -40, y: 40, z: 15 },
+                    { x: -40, y: 55, z: 15 },
+                    //right side
+                    { x: -40, y: 55, z: -15 },
+                    { x: -40, y: 40, z: -15 },
+                    { x: -20, y: 10, z: -15 },
+                    { x: 40, y: 10, z: -15 },
+                    { x: 70, y: 25, z: -15 },
+                ],
+                translate: { y: 5 },
+                closed: true,
+                fill: true,
+                color: grey,
+            });
+
+            this.underBarrel = new Zdog.Cylinder({
+                addTo: this.gunAnchor,
+                diameter: 15,
+                length: 50,
+                stroke: false,
+                translate: { x: - 110, y: 37 },
+                rotate: { y: TAU / 4 },
+                color: grey,
+                backface: grey.shadow,
+            });
+
+            this.underBarrelSlide = new Zdog.Shape({
+                addTo: this.gunAnchor,
+                stroke: 25,
+                path: [
+                    { x: -80, y: 40, z: 0 },
+                    { x: -80, y: 45, z: 0 },
+                    { x: -80, y: 40, z: 0 },
+                    { x: -50, y: 50, z: 0 },
+                    { x: -30, y: 50, z: 0 },
+                    { x: -20, y: 50, z: 0 },
+                    { x: -20, y: 40, z: 0 },
+                ],
+                closed: true,
+                fill: true,
+                color: white,
+            });
+
+            this.ammoCylinder = new Zdog.Cylinder({
+                addTo: this.gunAnchor,
+                diameter: 50,
+                length: 55,
+                stroke: 2,
+                translate: { x: 10, y: 40 },
+                rotate: { y: TAU / 4 },
+                color: grey,
+            });
+
+            this.gapFill = new Zdog.Shape({
+                addTo: this.gunAnchor,
+                stroke: 25,
+                path: [
+                    { x: -70, y: 20 },
+                    { x: 10, y: 20 },
+                ],
+                color: grey,
+            });
 
             flipIfRight(this, side);
-            
-        }
+        }//end weapon
 
         function flipShape(zdogShape, axis){
+            //still kinda wonky, its doesnt like flipping the same shape (or a copy of that shape) twice, and I dont know why
             if (!axis) axis = 'z';
+            axis = axis.toLowerCase();
             if (!zdogShape.addTo){ //if it doesn't have an addTo, we are assuming it's not a Zdog shape,
                 zdogShape = zdogShape.anchor; //allows custom contructed objects to be flippable
             }
@@ -867,7 +1182,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
         function flipAll(partObject){
             for (var key in partObject) {
-                if (partObject.hasOwnProperty(key)) {
+                if (partObject.hasOwnProperty(key) && key != 'anchor') { //last bit prevents flipping of main anchor options
                     flipShape(partObject[key]);
                 }
             }
