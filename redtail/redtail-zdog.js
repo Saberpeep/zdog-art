@@ -11,19 +11,29 @@ if (false){
 
 document.addEventListener('DOMContentLoaded', function(){
     var TAU = Zdog.TAU,
-        canvas = document.querySelector('.zdog-canvas');
+        canvas = document.querySelector('.zdog-canvas'),
+        spinning = true,
+        spinningTimeout;
 
     let illo = new Zdog.Illustration({
         element: '.zdog-canvas',
         dragRotate: true,
-        //resize: true,
-        /*onResize: function( width ) {
-            // scale zoom
-            this.zoom = width / 400;
-        },*/
+        onDragStart: function(){
+            clearTimeout(spinningTimeout);
+            spinning = false;
+        },
+        onDragEnd: function(){
+            clearTimeout(spinningTimeout);
+            spinningTimeout = setTimeout(function(){
+                spinning = true;
+            }, 2000)
+        },
+        zoom: 0.8,
+        rotate: { x: -TAU / 16, y: -TAU / 8 },
     });
     var redtail = new Redtail({
         addTo: illo,
+        translate: { y: -100 },
     });
 
     window.redtail = redtail;
@@ -250,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function(){
                     { x: 0, y: 0, z: 0 },  
                 ],
                 color: red.shadow,
+                visible: false,
             });
 
             this.hullR = new HullHalf({
@@ -1196,6 +1207,9 @@ document.addEventListener('DOMContentLoaded', function(){
     };
 
     function animate() {
+
+        if(spinning) illo.rotate.y += TAU / 720;
+
         illo.updateRenderGraph();
         requestAnimationFrame(animate);
     }
