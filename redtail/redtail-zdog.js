@@ -60,10 +60,10 @@ document.addEventListener('DOMContentLoaded', function(){
             }
     
         } 
-        var white = new Color('#aebad2', undefined, '#393a51'),
-            red = new Color('#eb435f'),
+        var white = new Color('#aebad2', '#dfe5f2', '#959dad'),
+            red = new Color('#eb435f','#fcc7d0','#730013'),
             brown = new Color('rgba(67, 43, 19, 0.9)', 'rgba(161, 124, 43, 0.9)', 'rgba(28, 16, 4, 0.9)'),
-            grey = new Color('#92929a',undefined,'#292a2d',);
+            grey = new Color('#92929a','#e1e1e6','#292a2d',);
             yellow = new Color('#87987c','#dedd6f','#25321b');
         this.colors = {white:white, red:red, brown:brown, grey:grey};
 
@@ -263,6 +263,23 @@ document.addEventListener('DOMContentLoaded', function(){
                 visible: false,
             });
 
+            this.antenna = new Zdog.Shape({
+                //helps alliviate z-fighting
+                addTo: this.anchor,
+                stroke: 7,
+                path: [
+                    { x: -100, y: 5, z: -75 },
+                    { x: -80, y: -30, z: -76 },
+                    { x: -70, y: -32, z: -76 },
+                    { x: -60, y: -30, z: -76 },
+                    { x: -74, y: -5, z: -76 },
+                    { x: -80, y: -5, z: -75 },
+                ],
+                color: white,
+                closed: true,
+                fill: true,
+            }) 
+
             this.hullR = new HullHalf({
                 addTo: this.anchor,
             }, 'R');
@@ -326,6 +343,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     closed: true,
                     color: white,
+                    backface: white.shadow,
+                    front: { y: -1 },
                 });
     
                 this.trimPanel = new Zdog.Shape({
@@ -366,6 +385,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     closed: true,
                     color: white,
+                    backface: white.shadow,
+                    front: { y: -1 },
                 });
     
                 this.trimLine = new Zdog.Shape({
@@ -409,6 +430,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     closed: true,
                     color: grey,
+                    backface: grey.shadow,
+                    front: { y: -1 },
                 });
     
                 this.trimLineDetail = new Zdog.Ellipse({
@@ -465,6 +488,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     translate: { y: 7 },
                     color: yellow.highlight,
+                    backface: yellow,
+                    front: { y: 1 },
                 });
     
                 this.tailFinA = new Zdog.Shape({
@@ -487,6 +512,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     closed: true,
                     color: red,
+                    backface: red.shadow,
+                    front: { y: -1 },
                 });
     
                 this.tailFinB = new Zdog.Shape({
@@ -500,6 +527,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     closed: true,
                     color: red,
+                    backface: red.shadow,
+                    front: { y: -1 },
                 });
 
                 flipIfRight(this, side);
@@ -613,6 +642,8 @@ document.addEventListener('DOMContentLoaded', function(){
                 fill: true,
                 translate: { y: 20, z: 50 },
                 color: white,
+                backface: white.shadow,
+                front: { y: -1 },
             });
 
             this.ammoBay = new Zdog.Box({
@@ -933,7 +964,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 fill: true,
                 translate: { x: -30, y: 60, z: 35 },
                 rotate: { y: TAU / 4 - TAU / 16 },
-                color: white.shadow,
+                color: grey.shadow,
             });
 
             this.frontJetGroup = new Zdog.Group({
@@ -1046,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
             this.mainBarrel = new Zdog.Cylinder({
                 addTo: this.gunAnchor,
-                diameter: 15,
+                diameter: 13,
                 length: 200,
                 stroke: false,
                 translate: { x: -70, y: 10 },
