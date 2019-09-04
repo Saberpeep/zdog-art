@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function(){
     });
 
     window.redtail = redtail;
-    console.log(redtail);
+    console.log("redtail:", redtail);
 
     canvas.addEventListener('wheel', function(e){
         e.preventDefault();
@@ -89,12 +89,10 @@ document.addEventListener('DOMContentLoaded', function(){
             //given a percentage, returns the rgba color at that point on linear gradient between the 3 supplied colors. 
             function getColorForShade(alpha) {
                 var endIndex = shades.length - 1,
-                    where = alpha * endIndex;
-                for (var i = 1; i < endIndex; i++) {
-                    if (where < i) {
-                        break;
-                    }
-                }
+                    where = alpha * endIndex,
+                    i = Math.ceil(where) || 1;
+                    //the 2 colors on the gradient that we fall between are [i] and [i - 1].
+                    //once we have determined i, we now need to find how much of each color we need to mix.
                 var lower = shades[i - 1], 
                     upper = shades[i], 
                     lowerPct = (i - 1) / endIndex, 
@@ -102,7 +100,8 @@ document.addEventListener('DOMContentLoaded', function(){
                     range = upperPct - lowerPct, 
                     rangePct = (alpha - lowerPct) / range, 
                     pctLower = 1 - rangePct, 
-                    pctUpper = rangePct, 
+                    pctUpper = rangePct,
+                    //pctLower and pctUpper determine the amount of each color we need to mix, respectively. 
                     color = {
                         r: Math.floor(lower.r * pctLower + upper.r * pctUpper),
                         g: Math.floor(lower.g * pctLower + upper.g * pctUpper),
@@ -117,9 +116,9 @@ document.addEventListener('DOMContentLoaded', function(){
             }
             this.toString = toString.bind(this);
 
-            //This function returns a object with a toString() method,
+            //This function returns an object with a toString() method,
             // so that zDog stores the object instead of a string value,
-            // so that its value can change each time Zdog goes to render the object.
+            // so that its value can change each time zDog goes to render the object.
             // ie. `shape.color = red.shadeByDepth(this)` will return the correct shade
             // based on the depth at each frame without needing to manually be called in animate().
             //This does not work on shapes with colors defined manually with .highlight or .shadow.
@@ -142,9 +141,6 @@ document.addEventListener('DOMContentLoaded', function(){
                             lower = 0.3; //how dark the lighting goes (closer to 0)
                         var percent = mapScale(sortValue, this.min, this.max, (reverse? upper : lower), (reverse? lower : upper));
                         var adjustedColor = getColorForShade(percent);
-                        if (adjustedColor == null){
-                            throw "out of range"
-                        } 
                         return adjustedColor;
                     },
                     highlight: highlightColor,
@@ -1346,6 +1342,35 @@ document.addEventListener('DOMContentLoaded', function(){
                     }
                 }
             }
+        }
+
+        function toggleWireframeAll(partObject){
+            partObject.wireframeEnabled = !partObject.wireframeEnabled;
+            for (var key in partObject) {
+                if (partObject.hasOwnProperty(key)) {
+                    var thisPart = partObject[key];
+                    if (isDefined(thisPart.fill)){
+                        if(!isDefined(thisPart.wireframeIgnore) && thisPart.fill == false){
+                            thisPart.wireframeIgnore = true;
+                        }else if(thisPart.fill){
+                            thisPart.wireframeIgnore = false;
+                        }
+                        if(!thisPart.wireframeIgnore){
+                            thisPart.fill = !partObject.wireframeEnabled;
+                        }
+                    }else if(thisPart.anchor){
+                        toggleWireframeAll(thisPart);
+                    }
+                }
+            }
+        }
+
+        this.toggleWireframe = function(){
+            toggleWireframeAll(this);
+        }.bind(this);
+
+        function isDefined(prop){
+            return !(typeof prop === "undefined");
         }
     };
 
