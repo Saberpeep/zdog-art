@@ -1349,17 +1349,22 @@ document.addEventListener('DOMContentLoaded', function(){
             for (var key in partObject) {
                 if (partObject.hasOwnProperty(key)) {
                     var thisPart = partObject[key];
-                    if (isDefined(thisPart.fill)){
-                        if(!isDefined(thisPart.wireframeIgnore) && thisPart.fill == false){
-                            thisPart.wireframeIgnore = true;
-                        }else if(thisPart.fill){
-                            thisPart.wireframeIgnore = false;
+                    if (typeof thisPart == 'object'){
+                        if ('fill' in thisPart){ //`in` is used to check if a property is defined at all (regardless of truthiness in value).
+                            //Parts are marked as ignored if they are already not filled, 
+                            // and thus are skipped even in future toggles.
+                            // This is to prevent accidentally filling parts on toggle back.
+                            if(!('wireframeIgnore' in thisPart) && !thisPart.fill){
+                                thisPart.wireframeIgnore = true;
+                            }else if(thisPart.fill){
+                                thisPart.wireframeIgnore = false;
+                            }
+                            if(!thisPart.wireframeIgnore){
+                                thisPart.fill = !partObject.wireframeEnabled;
+                            }
+                        }else if(thisPart.anchor){
+                            toggleWireframeAll(thisPart);
                         }
-                        if(!thisPart.wireframeIgnore){
-                            thisPart.fill = !partObject.wireframeEnabled;
-                        }
-                    }else if(thisPart.anchor){
-                        toggleWireframeAll(thisPart);
                     }
                 }
             }
@@ -1368,10 +1373,6 @@ document.addEventListener('DOMContentLoaded', function(){
         this.toggleWireframe = function(){
             toggleWireframeAll(this);
         }.bind(this);
-
-        function isDefined(prop){
-            return !(typeof prop === "undefined");
-        }
     };
 
     function animate() {
