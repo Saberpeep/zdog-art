@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+    <head>
+        <meta charset="utf-8">
+        <title>zdog</title>
+        <style>
+            html, body{
+                height: 100%;
+                margin: 0;
+            }
+            body{
+                box-sizing: border-box;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+            .zdog-canvas{
+                border: 1px dotted grey;
+                cursor: move;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas class="zdog-canvas" width="600" height="480"></canvas>
+        <small class="attrib">made with <a href="https://zzz.dog">Zdog</a></small>
+        <small><a href="javascript:void(0)" onclick="birb.toggleWireframe()">toggle wireframe</a></small>
+        <script src="zdog.dist.min.js"></script>
+        <script src="birb-zdog.js"></script>
+    </body>
+</html>
