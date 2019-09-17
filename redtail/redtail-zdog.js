@@ -38,123 +38,12 @@ document.addEventListener('DOMContentLoaded', function(){
         illo.zoom = zoom;
     }, false);
 
-    function Redtail(options){
-
-        function Color(baseColor, highlightColor, shadowColor){
-            this.base = baseColor;
-            this.highlight = highlightColor || baseColor;
-            this.shadow = shadowColor || baseColor;
-
-            var shades = [];
-
-            if(shadowColor){
-                shades.push(parseColor(shadowColor));
-            }
-            if(baseColor){
-                shades.push(parseColor(baseColor));
-            }
-            if(highlightColor){
-                shades.push(parseColor(highlightColor));
-            }
-            function parseColor(colorString){
-                if (colorString.includes("#")){
-                    return hex2rgb(colorString);
-                }else if(colorString.includes("rgb")){
-                    return rgb2obj(colorString)
-                }
-            }
-            function rgb2obj(rgb){
-                var arr = rgb.substr(rgb.indexOf("(") + 1).split(",");
-                var color = {
-                    r: parseFloat(arr[0]),
-                    g: parseFloat(arr[1]),
-                    b: parseFloat(arr[2]),
-                    a: parseFloat(arr[3]) || 1,
-                }
-                return color;
-            }
-            function hex2rgb(hex) {
-                var m = hex.match(/^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
-                return {
-                    r: parseInt(m[1], 16),
-                    g: parseInt(m[2], 16),
-                    b: parseInt(m[3], 16),
-                    a: 1,
-                };
-            }
-            function mapScale(num, in_min, in_max, out_min, out_max){
-                return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-            }
-            
-            //given a percentage, returns the rgba color at that point on linear gradient between the 3 supplied colors. 
-            function getColorForShade(alpha) {
-                var endIndex = shades.length - 1,
-                    where = alpha * endIndex,
-                    i = Math.ceil(where) || 1;
-                    //the 2 colors on the gradient that we fall between are [i] and [i - 1].
-                    //once we have determined i, we now need to find how much of each color we need to mix.
-                var lower = shades[i - 1], 
-                    upper = shades[i], 
-                    lowerPct = (i - 1) / endIndex, 
-                    upperPct = i / endIndex, 
-                    range = upperPct - lowerPct, 
-                    rangePct = (alpha - lowerPct) / range, 
-                    pctLower = 1 - rangePct, 
-                    pctUpper = rangePct,
-                    //pctLower and pctUpper determine the amount of each color we need to mix, respectively. 
-                    color = {
-                        r: Math.floor(lower.r * pctLower + upper.r * pctUpper),
-                        g: Math.floor(lower.g * pctLower + upper.g * pctUpper),
-                        b: Math.floor(lower.b * pctLower + upper.b * pctUpper),
-                        a: lower.a * pctLower + upper.a * pctUpper,
-                    };
-                return 'rgb(' + [color.r, color.g, color.b, color.a].join(',') + ')';
-            }
-
-            function toString(){
-                return this.base;
-            }
-            this.toString = toString.bind(this);
-
-            //This function returns an object with a toString() method,
-            // so that zDog stores the object instead of a string value,
-            // so that its value can change each time zDog goes to render the object.
-            // ie. `shape.color = red.shadeByDepth(this)` will return the correct shade
-            // based on the depth at each frame without needing to manually be called in animate().
-            //This does not work on shapes with colors defined manually with .highlight or .shadow.
-            function shadeByDepth(zdogObj, reverse){
-                return {
-                    min: 100,
-                    max: 100,
-                    toString: function(){
-                        if (zdogObj && zdogObj.sortValue){       
-                            return this.adjustColor(zdogObj.sortValue, reverse);
-                        }else{
-                            console.log("shadeByDepth(): no sortValue found: ", zdogObj);
-                            return "red";
-                        }
-                    },
-                    adjustColor: function(sortValue, reverse){
-                        if (sortValue > this.max) this.max = sortValue;
-                        if (sortValue < this.min) this.min = sortValue;
-                        var upper = 0.7, //how bright the lighting goes (closer to 1)
-                            lower = 0.3; //how dark the lighting goes (closer to 0)
-                        var percent = mapScale(sortValue, this.min, this.max, (reverse? upper : lower), (reverse? lower : upper));
-                        var adjustedColor = getColorForShade(percent);
-                        return adjustedColor;
-                    },
-                    highlight: highlightColor,
-                    base: baseColor,
-                    shadow: shadowColor,
-                }
-            }
-            this.shadeByDepth = shadeByDepth.bind(this);
-        } 
-        var white = new Color('#aebad2', '#dfe5f2', '#959dad'),
-            red = new Color('#eb435f','#fcc7d0','#730013'),
-            brown = new Color('rgba(67, 43, 19, 0.9)', 'rgba(161, 124, 43, 0.9)', 'rgba(28, 16, 4, 0.9)'),
-            grey = new Color('#92929a','#e1e1e6','#292a2d',);
-            yellow = new Color('#87987c','#dedd6f','#25321b');
+    function Redtail(options){ 
+        var white = new Color(['#959dad','#aebad2','#dfe5f2']),
+            red = new Color(['#730013','#eb435f','#fcc7d0']),
+            brown = new Color(['rgba(28, 16, 4, 0.9)','rgba(67, 43, 19, 0.9)','rgba(161, 124, 43, 0.9)']),
+            grey = new Color(['#292a2d','#92929a','#e1e1e6']);
+            yellow = new Color(['#25321b','#87987c','#dedd6f']);
         this.colors = {white:white, red:red, brown:brown, grey:grey};
 
             
@@ -547,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         { x: -200, y: 200, z: 100 },
                     ],
                     translate: { y: 7 },
-                    color: yellow,
+                    color: yellow.highlight,
                     visible: false,
                 });
                 this.headlight = new Zdog.Shape({
@@ -580,7 +469,6 @@ document.addEventListener('DOMContentLoaded', function(){
                     fill: true,
                     translate: { y: 7 },
                     color: yellow.highlight,
-                    backface: yellow,
                     front: { y: 1 },
                 });
     
